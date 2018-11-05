@@ -3,7 +3,7 @@ from __future__ import print_function
 from __future__ import division
 import os
 
-DEVICE = 'esp8266'
+DEVICE = 'pi'
 """Device used to control LED strip. Must be 'pi',  'esp8266' or 'blinkstick'
 
 'esp8266' means that you are using an ESP8266 module to control the LED strip
@@ -12,8 +12,8 @@ and commands will be sent to the ESP8266 over WiFi.
 'pi' means that you are using a Raspberry Pi as a standalone unit to process
 audio input and control the LED strip directly.
 
-'blinkstick' means that a BlinkstickPro is connected to this PC which will be used
-to control the leds connected to it.
+'blinkstick' means that a BlinkstickPro is connected to this PC which will be
+ used to control the leds connected to it.
 """
 
 if DEVICE == 'esp8266':
@@ -44,6 +44,9 @@ if DEVICE == 'blinkstick':
 
 USE_GUI = True
 """Whether or not to display a PyQtGraph GUI plot of visualization"""
+
+USE_LED = False
+"""Whether or not to output to the LED strip"""
 
 DISPLAY_FPS = True
 """Whether to display the FPS when running (can reduce performance)"""
