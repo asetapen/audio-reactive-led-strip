@@ -4,7 +4,7 @@ import time
 import numpy as np
 from pyqtgraph.Qt import QtGui
 import pyqtgraph as pg
-from pyqtgraph.dockarea import *
+# from pyqtgraph.dockarea import *
 
 
 class GUI:

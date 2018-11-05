@@ -10,7 +10,7 @@ if config.DEVICE == 'esp8266':
     import socket
     _sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # Raspberry Pi controls the LED strip directly
-elif config.DEVICE == 'pi':
+elif config.DEVICE == 'pi' and config.USE_LED:
     import neopixel
     strip = neopixel.Adafruit_NeoPixel(config.N_PIXELS, config.LED_PIN,
                                        config.LED_FREQ_HZ, config.LED_DMA,
@@ -20,7 +20,8 @@ elif config.DEVICE == 'blinkstick':
     from blinkstick import blinkstick
     import signal
     import sys
-    #Will turn all leds off when invoked.
+
+    # Will turn all leds off when invoked.
     def signal_handler(signal, frame):
         all_off = [0]*(config.N_PIXELS*3)
         stick.set_led_data(0, all_off)
@@ -41,6 +42,7 @@ pixels = np.tile(1, (3, config.N_PIXELS))
 """Pixel values for the LED strip"""
 
 _is_python_2 = int(platform.python_version_tuple()[0]) == 2
+
 
 def _update_esp8266():
     """Sends UDP packets to ESP8266 to update LED strip values
@@ -108,12 +110,13 @@ def _update_pi():
     _prev_pixels = np.copy(p)
     strip.show()
 
+
 def _update_blinkstick():
     """Writes new LED values to the Blinkstick.
         This function updates the LED strip with new values.
     """
     global pixels
-    
+
     # Truncate values and cast to integer
     pixels = np.clip(pixels, 0, 255).astype(int)
     # Optional gamma correction
@@ -123,7 +126,7 @@ def _update_blinkstick():
     g = p[1][:].astype(int)
     b = p[2][:].astype(int)
 
-    #create array in which we will store the led states
+    # create array in which we will store the led states
     newstrip = [None]*(config.N_PIXELS*3)
 
     for i in range(config.N_PIXELS):
@@ -131,7 +134,7 @@ def _update_blinkstick():
         newstrip[i*3] = g[i]
         newstrip[i*3+1] = r[i]
         newstrip[i*3+2] = b[i]
-    #send the data to the blinkstick
+    # send the data to the blinkstick
     stick.set_led_data(0, newstrip)
 
 

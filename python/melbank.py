@@ -6,7 +6,8 @@ An example ist shown in the following figure:
     from pylab import plt
     import melbank
     f1, f2 = 1000, 8000
-    melmat, (melfreq, fftfreq) = melbank.compute_melmat(6, f1, f2, num_fft_bands=4097)
+    melmat, (melfreq, fftfreq) = melbank.compute_melmat(
+        6, f1, f2, num_fft_bands=4097)
     fig, ax = plt.subplots(figsize=(8, 3))
     ax.plot(fftfreq, melmat.T)
     ax.grid(True)
@@ -30,7 +31,7 @@ Functions
 ---------
 """
 
-from numpy import abs, append, arange, insert, linspace, log10, round, zeros
+from numpy import abs, arange, linspace, log10, zeros
 
 
 def hertz_to_mel(freq):
@@ -61,7 +62,10 @@ def mel_to_hertz(mel):
     return 700.0 * (10**(mel / 2595.0)) - 700.0
 
 
-def melfrequencies_mel_filterbank(num_bands, freq_min, freq_max, num_fft_bands):
+def melfrequencies_mel_filterbank(num_bands,
+                                  freq_min,
+                                  freq_max,
+                                  num_fft_bands):
     """Returns centerfrequencies and band edges for a mel filter bank
     Parameters
     ----------
@@ -120,7 +124,8 @@ def compute_melmat(num_mel_bands=12, freq_min=64, freq_max=8000,
         this will tranform your fft-spectrum
         to a mel-spectrum.
     frequencies : tuple (ndarray <num_mel_bands>, ndarray <num_fft_bands>)
-        Center frequencies of the mel bands, center frequencies of fft spectrum.
+        Center frequencies of the mel bands, center frequencies of fft
+        spectrum.
     """
     center_frequencies_mel, lower_edges_mel, upper_edges_mel =  \
         melfrequencies_mel_filterbank(
