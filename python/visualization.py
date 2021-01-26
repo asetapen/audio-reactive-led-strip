@@ -1,8 +1,11 @@
 from __future__ import print_function
 from __future__ import division
+
 import time
 import numpy as np
+
 from scipy.ndimage.filters import gaussian_filter1d
+
 import config
 import microphone
 import dsp
@@ -13,6 +16,8 @@ _time_prev = time.time() * 1000.0
 
 _fps = dsp.ExpFilter(val=config.FPS, alpha_decay=0.2, alpha_rise=0.2)
 """The low-pass filter used to estimate frames-per-second"""
+
+client = led.init_client()
 
 
 def frames_per_second():
@@ -203,7 +208,7 @@ def microphone_update(audio_samples):
         print('No audio input. Volume below threshold. Volume:', vol)
         if config.USE_LED:
             led.pixels = np.tile(0, (3, config.N_PIXELS))
-            led.update()
+            led.update(client)
     else:
         # Transform audio input into the frequency domain
         N = len(y_data)
@@ -226,7 +231,7 @@ def microphone_update(audio_samples):
         output = visualization_effect(mel)
         if config.USE_LED:
             led.pixels = output
-            led.update()
+            led.update(client)
         if config.USE_GUI:
             # Plot filterbank output
             x = np.linspace(
@@ -365,6 +370,6 @@ if __name__ == '__main__':
         layout.addItem(spectrum_label)
     # Initialize LEDs
     if config.USE_LED:
-        led.update()
+        led.update(client)
     # Start listening to live audio stream
     microphone.start_stream(microphone_update)

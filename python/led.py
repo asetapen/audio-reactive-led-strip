@@ -5,6 +5,15 @@ import platform
 import numpy as np
 import config
 
+
+def init_client():
+    import opc
+    print("setting client")
+    client = opc.Client('{}:{}'.format(config.FADE_IP, config.FADE_PORT))
+    print("setting client")
+    return client
+
+
 # ESP8266 uses WiFi communication
 if config.DEVICE == 'esp8266':
     import socket
@@ -16,6 +25,10 @@ elif config.DEVICE == 'pi' and config.USE_LED:
                                        config.LED_FREQ_HZ, config.LED_DMA,
                                        config.LED_INVERT, config.BRIGHTNESS)
     strip.begin()
+# Fadecandy controls the LED strip directly
+elif config.DEVICE == 'facecandy':
+    print("initing client")
+    client = config.init_client('fadecandy')
 elif config.DEVICE == 'blinkstick':
     from blinkstick import blinkstick
     import signal
@@ -85,6 +98,26 @@ def _update_esp8266():
     _prev_pixels = np.copy(p)
 
 
+def _update_fadecandy(client=None):
+    global pixels
+    # Truncate values and cast to integer
+    pixels = np.clip(pixels, 0, 255).astype(int)
+    # Optional gamma correction
+    p = _gamma[pixels] if config.SOFTWARE_GAMMA_CORRECTION else np.copy(pixels)
+
+    r = p[0][:].astype(int)
+    g = p[1][:].astype(int)
+    b = p[2][:].astype(int)
+
+    # create array in which we will store the led states
+    newstrip = [None] * (config.N_PIXELS)
+    for i in range(config.N_PIXELS):
+        # blinkstick uses GRB format
+        newstrip[i] = (r[i], g[i], b[i])
+    if client:
+        client.put_pixels(newstrip)
+
+
 def _update_pi():
     """Writes new LED values to the Raspberry Pi's LED strip
 
@@ -106,6 +139,7 @@ def _update_pi():
         # Ignore pixels if they haven't changed (saves bandwidth)
         if np.array_equal(p[:, i], _prev_pixels[:, i]):
             continue
+        print(str(strip))
         strip._led_data[i] = rgb[i]
     _prev_pixels = np.copy(p)
     strip.show()
@@ -138,12 +172,14 @@ def _update_blinkstick():
     stick.set_led_data(0, newstrip)
 
 
-def update():
+def update(client=None):
     """Updates the LED strip values"""
     if config.DEVICE == 'esp8266':
         _update_esp8266()
     elif config.DEVICE == 'pi':
         _update_pi()
+    elif config.DEVICE == 'fadecandy':
+        _update_fadecandy(client)
     elif config.DEVICE == 'blinkstick':
         _update_blinkstick()
     else:
